@@ -1,0 +1,143 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>인사이트코리아 정치성향테스트</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body { font-family: 'Noto Sans KR', sans-serif; margin: 0; padding: 20px; background: #f9fafb; }
+      .container { max-width: 800px; margin: auto; }
+      .result-box { background: #ffffff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; text-align: center; }
+      .result-title { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+      .result-image { width: 120px; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-top: 10px; }
+      .question-box { background: #ffffff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+      .question-text { font-size: 20px; font-weight: bold; margin-bottom: 20px; }
+      .button { padding: 10px 20px; margin: 5px; border-radius: 8px; cursor: pointer; border: none; transition: 0.2s; }
+      .button:hover { opacity: 0.85; }
+      .blue { background-color: #3b82f6; color: white; }
+      .red { background-color: #ef4444; color: white; }
+      .gray { background-color: #6b7280; color: white; }
+      canvas { margin-top: 30px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="resultBox" class="result-box" style="display:none;">
+        <div class="result-title" id="resultText"></div>
+        <img id="resultImage" class="result-image" src="" alt="성향 이미지" style="display:none;">
+      </div>
+      <div id="quiz" class="question-box"></div>
+      <canvas id="resultChart" width="500" height="400" style="display:none;"></canvas>
+    </div>
+    <script>
+      
+const questions = [
+  { q: '지역별 최저임금제를 도입해야 한다.', agree: '시장', disagree: '평등' },
+  { q: '팬데믹이 발생하면 강력한 방역 정책을 시행해야 한다.', agree: '공동체', disagree: '자유' },
+  { q: '주4일제를 도입해야 한다.', agree: '평등', disagree: '시장' },
+  { q: '임차인의 부동산 계약갱신청구권을 강화해야 한다.', agree: '평등', disagree: '보수' },
+  { q: '종합부동산세(종부세)를 강화해야 한다.', agree: '평등', disagree: '보수' },
+  { q: '그린벨트를 전폭적으로 해제해야 한다.', agree: '시장', disagree: '공동체' },
+  { q: '비상계엄을 선포한 윤석열 전 대통령에 내란죄를 선고해야 한다.', agree: '자유', disagree: '보수' },
+  { q: '기여입학제를 도입해야 한다.', agree: '시장', disagree: '공동체' },
+  { q: '정부 내각에 여성 장관을 의무화해야 한다.', agree: '진보', disagree: '보수' },
+  { q: '여성가족부를 폐지해야 한다.', agree: '보수', disagree: '진보' },
+  { q: '신재생에너지 비중을 높여야 한다.', agree: '진보', disagree: '시장' },
+  { q: '적극적 이민정책을 시행해야 한다.', agree: '시장', disagree: '공동체' },
+  { q: '검찰로부터 수사권을 완전하게 분리해야 한다.', agree: '자유', disagree: '보수' },
+  { q: '모병제를 전면적으로 시행해야 한다.', agree: '진보', disagree: '공동체' },
+  { q: 'FTA 체결국과 협정범위를 확대해야 한다.', agree: '자유', disagree: '평등' },
+  { q: '핵무기를 보유해야 한다.', agree: '보수', disagree: '진보' },
+  { q: '국민연금을 더 내고 더 받는 방식으로 개선해야 한다.', agree: '공동체', disagree: '시장' },
+  { q: '지방분권을 시행해야 한다.', agree: '자유', disagree: '보수' },
+  { q: '법인세를 늘려야 한다.', agree: '평등', disagree: '시장' },
+  { q: '식민지근대화론에 공감한다.', agree: '시장', disagree: '공동체' },
+  { q: '박정희 전 대통령을 긍정적으로 평가한다.', agree: '보수', disagree: '진보' },
+  { q: '난민을 더욱 개방적으로 수용해야 한다.', agree: '진보', disagree: '공동체' },
+  { q: '성소수자에 대한 편견을 가진다.', agree: '보수', disagree: '진보' },
+  { q: '공공임대주택을 늘려야 한다.', agree: '평등', disagree: '자유' },
+  { q: '대학서열화를 없애야 한다.', agree: '진보', disagree: '자유' },
+  { q: '외국어고 등 특목고를 폐지해야 한다.', agree: '진보', disagree: '자유' },
+  { q: '햇볕정책을 지지한다.', agree: '자유', disagree: '공동체' },
+  { q: '복지정책 강화 시 세금 2배도 감수할 수 있다.', agree: '평등', disagree: '자유' },
+  { q: '누진소득제를 강화해야 한다.', agree: '평등', disagree: '자유' },
+  { q: '기본소득제를 도입해야 한다.', agree: '평등', disagree: '공동체' },
+];
+ // 질문 리스트 30개 삽입
+
+      const categories = ['자유', '시장', '보수', '공동체', '평등', '진보'];
+      const scores = Object.fromEntries(categories.map(c => [c, 0]));
+      let step = 0;
+
+      function renderQuestion() {
+        if (step >= questions.length) return showResult();
+        const q = questions[step];
+        document.getElementById('quiz').innerHTML = `
+          <div class="question-text">${step+1}. ${q.q}</div>
+          <button class="button blue" onclick="answer('찬성')">찬성</button>
+          <button class="button gray" onclick="answer('의견없음')">의견없음</button>
+          <button class="button red" onclick="answer('반대')">반대</button>
+        `;
+      }
+
+      function answer(choice) {
+        const q = questions[step];
+        if (choice === '찬성') scores[q.agree]++;
+        if (choice === '반대') scores[q.disagree]++;
+        step++;
+        renderQuestion();
+      }
+
+      function showResult() {
+        document.getElementById('quiz').style.display = 'none';
+        document.getElementById('resultChart').style.display = 'block';
+        document.getElementById('resultBox').style.display = 'block';
+
+        const ctx = document.getElementById('resultChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'radar',
+          data: {
+            labels: categories,
+            datasets: [{
+              label: '성향 점수',
+              data: categories.map(c => scores[c]),
+              backgroundColor: 'rgba(59, 130, 246, 0.2)',
+              borderColor: 'rgba(59, 130, 246, 1)',
+              borderWidth: 2
+            }]
+          },
+          options: {
+            scales: {
+              r: {
+                suggestedMin: 0, suggestedMax: 10,
+                pointLabels: { font: { size: 16 } },
+                ticks: { display: false },
+                angleLines: { display: true },
+                grid: { circular: true }
+              }
+            },
+            elements: { line: { borderWidth: 2 } }
+          }
+        });
+
+        const r = scores;
+        let result = '회색주의자', image = '{roh}';
+        if (r['자유'] >= 5 && r['시장'] < 5 && r['보수'] < 5) { result = '진보적 자유주의자'; image = '{roh}'; }
+        else if (r['시장'] >= 5 && r['보수'] < 5) { result = '보수적 자유주의자'; image = '{mb}'; }
+        else if (r['시장'] >= 5 && r['보수'] >= 5) { result = '신보수주의자'; image = '{yoon}'; }
+        else if (r['보수'] >= 5 && r['시장'] < 5) { result = '전통적 보수주의자'; image = '{park}'; }
+        else if (r['공동체'] >= 5) { result = '공동체주의자'; image = '{lee}'; }
+        else if (r['진보'] >= 5 && r['평등'] < 5) { result = '진보주의자'; image = '{sim}'; }
+        else if (r['평등'] >= 5 && r['진보'] >= 5) { result = '사회민주주의자'; image = '{noh}'; }
+
+        document.getElementById('resultText').innerText = `당신의 성향: ${result}`;
+        document.getElementById('resultImage').src = image;
+        document.getElementById('resultImage').style.display = 'block';
+      }
+
+      renderQuestion();
+    </script>
+  </body>
+</html>
