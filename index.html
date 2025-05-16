@@ -135,17 +135,41 @@
           }
         });
 
-        const r = scores;
-        let result = '회색주의자';
-        if (r['자유'] >= 5 && r['시장'] < 5 && r['보수'] < 5) result = '진보적 자유주의자';
-        else if (r['시장'] >= 5 && r['보수'] < 5) result = '보수적 자유주의자';
-        else if (r['시장'] >= 5 && r['보수'] >= 5) result = '신보수주의자';
-        else if (r['보수'] >= 5 && r['시장'] < 5) result = '전통적 보수주의자';
-        else if (r['공동체'] >= 5) result = '공동체주의자';
-        else if (r['진보'] >= 5 && r['평등'] < 5) result = '진보주의자';
-        else if (r['평등'] >= 5 && r['진보'] >= 5) result = '사회민주주의자';
+        function checkOtherBelow(limit, except = []) {
+  return categories.every(c => except.includes(c) || scores[c] <= limit);
+}
 
-        document.getElementById('resultText').innerText = `당신의 성향: ${result}`;
+let result = '회색주의자';
+
+if (categories.every(c => scores[c] <= 2)) {
+  result = '회색주의자';
+} else if (categories.every(c => scores[c] <= 4)) {
+  result = '중도주의자';
+} else if (scores['진보'] >= 9 && scores['자유'] >= 7) {
+  result = '아나키스트';
+} else if (scores['시장'] >= 9 && scores['자유'] >= 7) {
+  result = '자유지상주의자';
+} else if (scores['보수'] >= 9 && scores['공동체'] >= 7) {
+  result = '파시스트';
+} else if (scores['평등'] >= 9 && scores['공동체'] >= 7) {
+  result = '공산주의자';
+} else if (scores['자유'] >= 5 && scores['진보'] >= 5 && checkOtherBelow(4, ['자유', '진보'])) {
+  result = '진보적 자유주의자';
+} else if (scores['자유'] >= 5 && scores['시장'] >= 5 && checkOtherBelow(4, ['자유', '시장'])) {
+  result = '보수적 자유주의자';
+} else if (scores['시장'] >= 5 && scores['보수'] >= 5 && checkOtherBelow(4, ['시장', '보수'])) {
+  result = '신보수주의자';
+} else if (scores['보수'] >= 5 && scores['공동체'] >= 5 && checkOtherBelow(4, ['보수', '공동체'])) {
+  result = '전통적 보수주의자';
+} else if (scores['평등'] >= 5 && scores['진보'] >= 5 && checkOtherBelow(4, ['평등', '진보'])) {
+  result = '사회민주주의자';
+} else if (scores['진보'] >= 5 && scores['자유'] < 5 && scores['평등'] < 5 && checkOtherBelow(4, ['진보'])) {
+  result = '진보주의자';
+} else if (scores['공동체'] >= 5 && scores['평등'] >= 5 && checkOtherBelow(4, ['공동체', '평등'])) {
+  result = '공동체주의자';
+}
+
+document.getElementById('resultText').innerText = `당신의 성향: ${result}`;
       }
     </script>
   </body>
