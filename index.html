@@ -5,7 +5,30 @@
     <meta charset="UTF-8" />
     <title>인사이트코리아 정치성향테스트</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js">
+// 결과 URL 복사 함수
+function copyShareLink() {
+  const url = new URL(window.location.href);
+  url.searchParams.set('result', result);
+  navigator.clipboard.writeText(url.toString()).then(() => {
+    alert('결과 링크가 복사되었습니다!');
+  });
+}
+
+// 페이지 로딩 시 URL에 result 파라미터가 있으면 바로 결과 표시
+window.onload = function () {
+  const urlParams = new URLSearchParams(window.location.search);
+  const sharedResult = urlParams.get('result');
+  if (sharedResult) {
+    document.getElementById('intro').style.display = 'none';
+    document.getElementById('quiz').style.display = 'none';
+    document.getElementById('resultBox').style.display = 'block';
+    document.getElementById('resultChart').style.display = 'none';
+    document.getElementById('resultText').innerText = `당신의 성향: ${sharedResult}`;
+  }
+};
+
+</script>
     <style>
       body { font-family: 'Noto Sans KR', sans-serif; margin: 0; padding: 20px; background: #f9fafb; }
       .container { max-width: 800px; margin: auto; }
@@ -35,6 +58,7 @@
 
       <div id="resultBox" class="result-box">
         <div class="result-title" id="resultText"></div>
+      <button class="button blue" onclick="copyShareLink()">결과 URL 복사하기</button>
       </div>
 
       <canvas id="resultChart" width="500" height="400"></canvas>
@@ -166,6 +190,29 @@ if (scores['진보'] >= 9 && scores['자유'] >= 7) {
 console.log('Final Result:', result);
 document.getElementById('resultText').innerText = `당신의 성향: ${result}`;
       }
-    </script>
+    
+// 결과 URL 복사 함수
+function copyShareLink() {
+  const url = new URL(window.location.href);
+  url.searchParams.set('result', result);
+  navigator.clipboard.writeText(url.toString()).then(() => {
+    alert('결과 링크가 복사되었습니다!');
+  });
+}
+
+// 페이지 로딩 시 URL에 result 파라미터가 있으면 바로 결과 표시
+window.onload = function () {
+  const urlParams = new URLSearchParams(window.location.search);
+  const sharedResult = urlParams.get('result');
+  if (sharedResult) {
+    document.getElementById('intro').style.display = 'none';
+    document.getElementById('quiz').style.display = 'none';
+    document.getElementById('resultBox').style.display = 'block';
+    document.getElementById('resultChart').style.display = 'none';
+    document.getElementById('resultText').innerText = `당신의 성향: ${sharedResult}`;
+  }
+};
+
+</script>
   </body>
 </html>
